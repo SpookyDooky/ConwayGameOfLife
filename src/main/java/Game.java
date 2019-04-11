@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Random;
 
 public class Game extends JFrame {
 
@@ -19,16 +20,24 @@ public class Game extends JFrame {
 
         this.populationArray = new int[heightAmount][widthAmount];
         this.windowHeight = 1000;
-        this.windowWidth = 1000;
+        this.windowWidth = 1800;
     }
 
     public void startGame(){
         initWindow();
+        initPopulation();
         this.update();
+        this.render();
     }
 
     public void initPopulation(){
-
+        Random rand = new Random();
+        for(int x = 1; x < widthAmount - 1; x++){
+            for(int y = 1; y < heightAmount - 1; y++){
+                int random = ((int)Math.floor(rand.nextDouble() * 2) + 1) - 1;
+                populationArray[y][x] = random;
+            }
+        }
     }
 
     public void initWindow(){
@@ -50,12 +59,12 @@ public class Game extends JFrame {
             for(int y = 1; y < heightAmount - 1; y++){
                 int neighbours = checkNeigbours(x,y);
 
-                if((populationArray[x][y] == 1) && ((neighbours < 2) || (neighbours > 3))){
-                    newPopulation[x][y] = 0;
-                } else if((populationArray[x][y] == 0) && (neighbours == 3)){
-                    newPopulation[x][y] = 1;
+                if((populationArray[y][x] == 1) && ((neighbours < 2) || (neighbours > 3))){
+                    newPopulation[y][x] = 0;
+                } else if((populationArray[y][x] == 0) && (neighbours == 3)){
+                    newPopulation[y][x] = 1;
                 } else {
-                    newPopulation[x][y] = populationArray[x][y];
+                    newPopulation[y][x] = populationArray[y][x];
                 }
             }
         }
@@ -66,10 +75,10 @@ public class Game extends JFrame {
         int result = 0;
         for(int x = -1; x <= 1; x++){
             for(int y = -1; y <= 1; y++){
-                result += populationArray[xValue + x][yValue + y];
+                result += populationArray[yValue + y][xValue + x];
             }
         }
-        result -= populationArray[xValue][yValue];
+        result -= populationArray[yValue][xValue];
         return result;
     }
 
@@ -84,7 +93,7 @@ public class Game extends JFrame {
                     for(int y = 0; y < heightAmount;y++){
                         int xValue = x * blockWidth;
                         int yValue = y * blockHeight;
-                        if(populationArray[x][y] == 1){
+                        if(populationArray[y][x] == 1){
                             g.setColor(Color.BLACK);
                         } else {
                             g.setColor(Color.WHITE);
@@ -98,11 +107,24 @@ public class Game extends JFrame {
 
     //Game loop
     private void render(){
-
+        boolean keepgoing = true;
+        int generation = 0;
+        while(keepgoing){
+            this.updatePopulation();
+            this.update();
+            this.repaint();
+            generation++;
+            System.out.println("GENERATION: " + generation);
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void main(String[] args){
-        Game game = new Game(200,200);
+        Game game = new Game(200,360);
         game.startGame();
     }
 }
