@@ -25,7 +25,10 @@ public class Game extends JFrame {
     public void startGame(){
         initWindow();
         this.update();
-        this.render();
+    }
+
+    public void initPopulation(){
+
     }
 
     public void initWindow(){
@@ -40,15 +43,40 @@ public class Game extends JFrame {
         });
     }
 
-    public void gameTick(){
+    public void updatePopulation(){
+        //We start at x = 1 and y = 1 and stop at xMax - 1, yMax -1, because edges are dead by default.
+        int[][] newPopulation = new int[heightAmount][widthAmount];
+        for(int x = 1; x < widthAmount - 1; x++){
+            for(int y = 1; y < heightAmount - 1; y++){
+                int neighbours = checkNeigbours(x,y);
 
+                if((populationArray[x][y] == 1) && ((neighbours < 2) || (neighbours > 3))){
+                    newPopulation[x][y] = 0;
+                } else if((populationArray[x][y] == 0) && (neighbours == 3)){
+                    newPopulation[x][y] = 1;
+                } else {
+                    newPopulation[x][y] = populationArray[x][y];
+                }
+            }
+        }
+        this.populationArray = newPopulation;
+    }
+
+    public int checkNeigbours(int xValue, int yValue){
+        int result = 0;
+        for(int x = -1; x <= 1; x++){
+            for(int y = -1; y <= 1; y++){
+                result += populationArray[xValue + x][yValue + y];
+            }
+        }
+        result -= populationArray[xValue][yValue];
+        return result;
     }
 
     public void update(){
         this.add(new JPanel(){
             @Override
             public void paint(Graphics g){
-                g.setColor(Color.BLACK);
                 int blockHeight = windowHeight/heightAmount;
                 int blockWidth = windowWidth/widthAmount;
 
@@ -56,14 +84,20 @@ public class Game extends JFrame {
                     for(int y = 0; y < heightAmount;y++){
                         int xValue = x * blockWidth;
                         int yValue = y * blockHeight;
-                        g.drawRect(xValue,yValue,blockWidth,blockHeight);
+                        if(populationArray[x][y] == 1){
+                            g.setColor(Color.BLACK);
+                        } else {
+                            g.setColor(Color.WHITE);
+                        }
+                        g.fillRect(xValue,yValue,blockWidth,blockHeight);
                     }
                 }
             }
         });
     }
 
-    public void render(){
+    //Game loop
+    private void render(){
 
     }
 
